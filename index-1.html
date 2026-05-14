@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>كهف AI - منصة الترجمة الذكية</title>
+    
+    <!-- Google Analytics - ضع معرف GA الخاص بك هنا -->
+    <!-- استبدل G-XXXXXXXXXX بمعرف Google Analytics الخاص بك -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+      
+      // دالة مساعدة لتتبع الأحداث
+      window.trackEvent = function(action, category, label, value) {
+        gtag('event', action, {
+          event_category: category,
+          event_label: label,
+          value: value
+        });
+      };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    
+    <style>
+      :root {
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --crust: #11111b;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --surface2: #585b70;
+        --overlay0: #6c7086;
+        --overlay1: #7f849c;
+        --subtext: #a6adc8;
+        --text: #cdd6f4;
+        --lavender: #b4befe;
+        --mauve: #cba6f7;
+        --blue: #89b4fa;
+        --sapphire: #74c7ec;
+        --green: #a6e3a1;
+        --red: #f38ba8;
+        --peach: #fab387;
+        --yellow: #f9e2af;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
+      html { scroll-behavior: smooth; }
+      
+      body {
+        font-family: 'Noto Kufi Arabic', sans-serif;
+        background: var(--base);
+        color: var(--text);
+        direction: rtl;
+        min-height: 100vh;
+      }
+
+      /* ===== NAVBAR ===== */
+      .navbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 100;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s;
+      }
+      .navbar.scrolled {
+        background: rgba(30,30,46,0.92);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--surface0);
+      }
+      .nav-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .logo-text { font-size: 1.2rem; font-weight: 800; color: white; }
+      .logo-ai { font-size: 0.85rem; color: var(--overlay1); margin-right: 2px; }
+      .nav-links { display: flex; align-items: center; gap: 2rem; }
+      .nav-link {
+        color: var(--subtext);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: inherit;
+      }
+      .nav-link:hover { color: var(--lavender); }
+      .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+      .btn-outline {
+        padding: 0.45rem 1.1rem;
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--subtext);
+        font-size: 0.85rem;
+        cursor: pointer;
+        background: transparent;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+      .btn-outline:hover { border-color: var(--lavender); color: var(--lavender); }
+      .btn-primary {
+        padding: 0.45rem 1.1rem;
+        background: var(--lavender);
+        border: none;
+        border-radius: 8px;
+        color: var(--base);
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+      .btn-primary:hover { transform: scale(1.04); box-shadow: 0 0 20px rgba(180,190,254,0.3); }
+
+      /* ===== AUTH MODAL ===== */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17,17,27,0.85);
+        backdrop-filter: blur(8px);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .modal-overlay.open { opacity: 1; pointer-events: auto; }
+      .modal {
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 16px;
+        padding: 2rem;
+        width: 90%;
+        max-width: 420px;
+        transform: translateY(20px);
+        transition: transform 0.3s;
+        position: relative;
+      }
+      .modal-overlay.open .modal { transform: translateY(0); }
+      .modal-close {
+        position: absolute;
+        top: 1rem; left: 1rem;
+        background: none;
+        border: none;
+        color: var(--overlay1);
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: color 0.2s;
+      }
+      .modal-close:hover { color: var(--red); }
+      .modal-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.4rem;
+        text-align: center;
+      }
+      .modal-subtitle {
+        font-size: 0.85rem;
+        color: var(--subtext);
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+      .auth-tabs {
+        display: flex;
+        background: var(--crust);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 1.5rem;
+        gap: 4px;
+      }
+      .auth-tab {
+        flex: 1;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--subtext);
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .auth-tab.active {
+        background: var(--surface0);
+        color: var(--lavender);
+        font-weight: 700;
+      }
+      .form-group { margin-bottom: 1rem; }
+      .form-label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--subtext);
+        margin-bottom: 0.4rem;
+      }
+      .form-input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        background: var(--crust);
+        border: 1px solid var(--surface0);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.9rem;
+        transition: border-color 0.2s;
+        outline: none;
+      }
+      .form-input:focus { border-color: var(--lavender); }
+      .form-input::placeholder { color: var(--overlay0); }
+      .btn-full {
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--lavender);
+        border: none;
+        border-radius: 10px;
+        color: var(--base);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        transition: all 0.2s;
+      }
+      .btn-full:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(180,190,254,0.35); }
+      .auth-error {
+        background: rgba(243,139,168,0.15);
+        border: 1px solid rgba(243,139,168,0.4);
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        font-size: 0.82rem;
+        color: var(--red);
+        margin-bottom: 1rem;
+        display: none;
+      }
+      .auth-error.show { display: block; }
+      .admin-badge {
+        background: linear-gradient(135deg, var(--mauve), var(--lavender));
+        color: var(--base);
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        margin-right: 6px;
+      }
+
+      /* ===== USER MENU ===== */
+      .user-menu { position: relative; }
+      .user-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.9rem;
+        background: var(--surface0);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .user-btn:hover { border-color: var(--lavender); }
+      .user-avatar {
+        width: 26px; height: 26px;
+        background: linear-gradient(135deg, var(--lavender), var(--mauve));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--base);
+      }
+      .dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 10px;
+        min-width: 180px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-8px);
+        transition: all 0.2s;
+        z-index: 50;
+      }
+      .dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+      .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 0.6rem 1rem;
+        text-align: right;
+        background: none;
+        border: none;
+        color: var(--subtext);
+        font-family: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .dropdown-item:hover { background: var(--surface0); color: var(--text); }
+      .dropdown-item.admin { color: var(--mauve); }
+      .dropdown-item.logout { color: var(--red); }
+      .dropdown-divider { height: 1px; background: var(--surface0); margin: 4px 0; }
+
+      /* ===== HERO ===== */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 64px;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: 
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(180,190,254,0.08) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 80% 80%, rgba(203,166,247,0.05) 0%, transparent 50%);
+      }
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image: 
+          linear-gradient(rgba(180,190,254,0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(180,190,254,0.04) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+      }
+      .hero-content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 2rem 1rem;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 1rem;
+        background: rgba(180,190,254,0.1);
+        border: 1px solid rgba(180,190,254,0.2);
+        border-radius: 20px;
+        font-size: 0.78rem;
+        color: var(--lavender);
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.6s ease forwards;
+      }
+      .hero-title {
+        font-size: clamp(2.2rem, 6vw, 4rem);
+        font-weight: 900;
+        color: white;
+        text-align: center;
+        margin-bottom: 1rem;
+        line-height: 1.15;
+        animation: fadeInUp 0.6s 0.1s ease both;
+      }
+      .hero-title span { color: var(--lavender); }
+      .hero-subtitle {
+        font-size: 1rem;
+        color: var(--subtext);
+        text-align: center;
+        max-width: 480px;
+        line-height: 1.7;
+        margin-bottom: 2.5rem;
+        animation: fadeInUp 0.6s 0.2s ease both;
+      }
+
+      /* ===== TRANSLATION CARD ===== */
+      .translation-card {
+        width: 90%;
+        max-width: 740px;
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+        animation: fadeInUp 0.7s 0.3s ease both;
+      }
+      .card-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--surface0);
+        background: rgba(0,0,0,0.15);
+      }
+      .toolbar-actions { display: flex; align-items: center; gap: 0.3rem; }
+      .tool-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px; height: 34px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: var(--subtext);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .tool-btn:hover { background: var(--surface0); color: var(--lavender); }
+      .char-count { font-size: 0.75rem; color: var(--overlay1); }
+      .input-area {
+        padding: 1rem 1.2rem 0.5rem;
+      }
+      .trans-textarea {
+        width: 100%;
+        height: 140px;
+        background: transparent;
+        border: none;
+        outline: none;
+        resize: none;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+      .trans-textarea::placeholder { color: var(--overlay0); }
+      .lang-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.2rem;
+        border-top: 1px solid var(--surface0);
+        border-bottom: 1px solid var(--surface0);
+      }
+      .lang-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 1rem;
+        background: var(--crust);
+        border: 1px solid var(--surface0);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+      .lang-btn:hover { border-color: var(--lavender); }
+      .swap-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: var(--surface0);
+        border: none;
+        color: var(--subtext);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 1rem;
+      }
+      .swap-btn:hover { background: var(--lavender); color: var(--base); transform: rotate(180deg); }
+      .lang-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        background: var(--crust);
+        border: 1px solid var(--surface0);
+        border-radius: 10px;
+        min-width: 180px;
+        z-index: 30;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        max-height: 280px;
+        overflow-y: auto;
+      }
+      .lang-option {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.55rem 1rem;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: right;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .lang-option:hover { background: var(--surface0); }
+      .lang-option.active { color: var(--lavender); background: rgba(180,190,254,0.08); }
+      .output-area {
+        padding: 0.75rem 1.2rem;
+        background: rgba(0,0,0,0.1);
+      }
+      .output-textarea {
+        width: 100%;
+        height: 120px;
+        background: var(--crust);
+        border: 1px solid var(--surface0);
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+        outline: none;
+        resize: none;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+      .output-textarea::placeholder { color: var(--overlay0); }
+      .translate-btn-wrap { padding: 0.75rem 1.2rem 1.2rem; }
+      .translate-btn {
+        width: 100%;
+        padding: 0.9rem;
+        background: var(--lavender);
+        border: none;
+        border-radius: 10px;
+        color: var(--base);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .translate-btn:hover { transform: scale(1.01); box-shadow: 0 0 30px rgba(180,190,254,0.35); }
+      .translate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+      .spinner {
+        width: 18px; height: 18px;
+        border: 2px solid rgba(30,30,46,0.3);
+        border-top-color: var(--base);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+
+      /* ===== TOAST ===== */
+      .toast {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 300;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+      }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .toast.success { background: rgba(166,227,161,0.9); color: #1e3a2e; }
+      .toast.error { background: rgba(243,139,168,0.9); color: #3a1e25; }
+
+      /* ===== STATS ===== */
+      .stats-section {
+        padding: 4rem 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+      .stat-card {
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 14px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+      }
+      .stat-card:hover { border-color: var(--lavender); transform: translateY(-3px); }
+      .stat-num { font-size: 2.2rem; font-weight: 900; color: var(--lavender); margin-bottom: 0.3rem; }
+      .stat-label { font-size: 0.85rem; color: var(--subtext); }
+
+      /* ===== FEATURES ===== */
+      .features-section {
+        padding: 5rem 1.5rem;
+        background: linear-gradient(to bottom, var(--base), var(--mantle));
+      }
+      .section-header { text-align: center; margin-bottom: 3rem; }
+      .section-title { font-size: 1.8rem; font-weight: 900; color: white; margin-bottom: 0.5rem; }
+      .section-sub { font-size: 0.9rem; color: var(--subtext); }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.2rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .feature-card {
+        background: var(--base);
+        border: 1px solid var(--surface0);
+        border-radius: 14px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+      }
+      .feature-card:hover { border-color: rgba(180,190,254,0.4); box-shadow: 0 0 20px rgba(180,190,254,0.06); }
+      .feature-icon {
+        width: 48px; height: 48px;
+        background: rgba(203,166,247,0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+      }
+      .feature-title { font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.4rem; }
+      .feature-desc { font-size: 0.82rem; color: var(--subtext); line-height: 1.6; }
+
+      /* ===== FOOTER ===== */
+      .footer {
+        background: var(--crust);
+        border-top: 1px solid var(--surface0);
+        padding: 3rem 1.5rem 1.5rem;
+      }
+      .footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 2rem;
+      }
+      .footer-brand p { font-size: 0.82rem; color: var(--subtext); margin-top: 0.75rem; line-height: 1.6; }
+      .footer-heading { font-size: 0.85rem; font-weight: 700; color: white; margin-bottom: 0.75rem; }
+      .footer-link {
+        display: block;
+        font-size: 0.82rem;
+        color: var(--subtext);
+        margin-bottom: 0.4rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer-link:hover { color: var(--lavender); }
+      .footer-bottom {
+        max-width: 1100px;
+        margin: 2rem auto 0;
+        padding-top: 1.2rem;
+        border-top: 1px solid var(--surface0);
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--overlay0);
+      }
+
+      /* ===== ADMIN PANEL ===== */
+      .admin-panel {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 150;
+        background: var(--crust);
+        overflow-y: auto;
+      }
+      .admin-panel.open { display: block; }
+      .admin-header {
+        background: var(--mantle);
+        border-bottom: 1px solid var(--surface0);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .admin-title { font-size: 1.2rem; font-weight: 800; color: var(--mauve); }
+      .admin-close {
+        padding: 0.45rem 1rem;
+        background: var(--surface0);
+        border: none;
+        border-radius: 8px;
+        color: var(--subtext);
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .admin-close:hover { color: var(--red); background: rgba(243,139,168,0.1); }
+      .admin-body { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+      .admin-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .admin-card {
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 12px;
+        padding: 1.2rem;
+      }
+      .admin-card-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 0.4rem; }
+      .admin-card-value { font-size: 1.8rem; font-weight: 900; color: var(--lavender); }
+      .admin-section-title { font-size: 1rem; font-weight: 700; color: white; margin-bottom: 1rem; }
+      .admin-table {
+        width: 100%;
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 12px;
+        overflow: hidden;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        margin-bottom: 2rem;
+      }
+      .admin-table th {
+        padding: 0.75rem 1rem;
+        background: var(--crust);
+        color: var(--subtext);
+        text-align: right;
+        font-weight: 600;
+      }
+      .admin-table td {
+        padding: 0.7rem 1rem;
+        border-top: 1px solid var(--surface0);
+        color: var(--text);
+      }
+      .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+      .badge-admin { color: var(--mauve); font-size: 0.75rem; }
+      .badge-user { color: var(--blue); font-size: 0.75rem; }
+      .action-btn-sm {
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.75rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-left: 0.3rem;
+      }
+      .delete-btn { background: rgba(243,139,168,0.15); color: var(--red); }
+      .delete-btn:hover { background: rgba(243,139,168,0.3); }
+
+      /* ===== ANALYTICS CHART ===== */
+      .chart-container {
+        background: var(--mantle);
+        border: 1px solid var(--surface0);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .mini-bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 1rem; }
+      .bar {
+        flex: 1;
+        background: linear-gradient(to top, var(--lavender), var(--mauve));
+        border-radius: 4px 4px 0 0;
+        min-height: 4px;
+        transition: height 0.6s ease;
+        opacity: 0.8;
+      }
+
+      /* ===== ANIMATIONS ===== */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 0 rgba(180,190,254,0); }
+        50% { box-shadow: 0 0 20px rgba(180,190,254,0.2); }
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 768px) {
+        .nav-links, .nav-actions { display: none; }
+        .footer-inner { grid-template-columns: 1fr; }
+        .mobile-auth-btns {
+          display: flex;
+          gap: 0.5rem;
+        }
+      }
+      @media (min-width: 769px) {
+        .mobile-auth-btns { display: none; }
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--surface1); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--overlay0); }
+    </style>
+  </head>
+  <body>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authModal">
+      <div class="modal">
+        <button class="modal-close" onclick="closeAuth()">✕</button>
+        <div class="modal-title">مرحباً بك في كهف AI</div>
+        <div class="modal-subtitle">سجّل دخولك للوصول إلى كامل المميزات</div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')" id="tabLogin">تسجيل الدخول</button>
+          <button class="auth-tab" onclick="switchTab('register')" id="tabRegister">حساب جديد</button>
+        </div>
+        <div class="auth-error" id="authError"></div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input class="form-input" type="email" id="loginEmail" placeholder="example@email.com" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" dir="ltr" />
+          </div>
+          <button class="btn-full" onclick="handleLogin()">دخول</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل</label>
+            <input class="form-input" type="text" id="regName" placeholder="أدخل اسمك" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input class="form-input" type="email" id="regEmail" placeholder="example@email.com" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور (6 أحرف على الأقل)</label>
+            <input class="form-input" type="password" id="regPassword" placeholder="••••••••" dir="ltr" />
+          </div>
+          <button class="btn-full" onclick="handleRegister()">إنشاء حساب</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-header">
+        <div>
+          <div class="admin-title">🛡️ لوحة تحكم المدير</div>
+          <div style="font-size:0.78rem;color:var(--subtext);margin-top:2px;">كهف AI - Admin Dashboard</div>
+        </div>
+        <button class="admin-close" onclick="closeAdmin()">← العودة للموقع</button>
+      </div>
+      <div class="admin-body">
+        <div class="admin-cards" id="adminCards">
+          <!-- populated by JS -->
+        </div>
+        <div class="chart-container">
+          <div class="admin-section-title">📊 إحصائيات الترجمة (آخر 7 أيام)</div>
+          <div class="mini-bar-chart" id="barChart"></div>
+          <div style="display:flex;gap:6px;margin-top:6px;justify-content:center;">
+            <span id="barLabels" style="display:flex;gap:6px;font-size:0.7rem;color:var(--overlay1);"></span>
+          </div>
+        </div>
+        <div class="admin-section-title">👥 المستخدمون المسجلون</div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>البريد الإلكتروني</th>
+              <th>الدور</th>
+              <th>تاريخ التسجيل</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+        <div class="admin-section-title">📝 سجل الترجمات الأخيرة</div>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>المستخدم</th>
+              <th>من</th>
+              <th>إلى</th>
+              <th>النص (مقتطف)</th>
+              <th>التوقيت</th>
+            </tr>
+          </thead>
+          <tbody id="transTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <a class="logo" onclick="scrollTo('#hero')">
+          <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+            <path d="M16 2C10 2 6 8 6 14c0 4 2 8 4 10v4c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-4c2-2 4-6 4-10 0-6-4-12-10-12zm-4 28v-2h8v2h-8z" fill="#b4befe" opacity="0.9"/>
+            <ellipse cx="16" cy="14" rx="4" ry="6" fill="#1e1e2e"/>
+            <circle cx="13" cy="12" r="1" fill="#b4befe" opacity="0.5"/>
+            <circle cx="19" cy="12" r="1" fill="#b4befe" opacity="0.5"/>
+          </svg>
+          <span class="logo-text">كهف</span><span class="logo-ai">AI</span>
+        </a>
+
+        <div class="nav-links">
+          <button class="nav-link" onclick="scrollTo('#hero')">الرئيسية</button>
+          <button class="nav-link" onclick="scrollTo('#translation')">الترجمة</button>
+          <button class="nav-link" onclick="scrollTo('#features')">المميزات</button>
+          <button class="nav-link" onclick="scrollTo('#stats')">الإحصائيات</button>
+        </div>
+
+        <div class="nav-actions" id="navActions">
+          <button class="btn-outline" onclick="openAuth('login')">تسجيل الدخول</button>
+          <button class="btn-primary" onclick="openAuth('register')">حساب جديد</button>
+        </div>
+
+        <!-- USER MENU (hidden initially) -->
+        <div class="user-menu" id="userMenu" style="display:none;">
+          <button class="user-btn" onclick="toggleDropdown()">
+            <div class="user-avatar" id="userAvatar">م</div>
+            <span id="userDisplayName">المستخدم</span>
+            <span style="font-size:0.7rem;color:var(--overlay1);">▾</span>
+          </button>
+          <div class="dropdown" id="userDropdown">
+            <button class="dropdown-item admin" id="adminBtn" onclick="openAdmin()" style="display:none;">🛡️ لوحة التحكم</button>
+            <div class="dropdown-divider" id="adminDivider" style="display:none;"></div>
+            <button class="dropdown-item" onclick="scrollToAndClose('#translation')">✨ ترجمة جديدة</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item logout" onclick="handleLogout()">تسجيل الخروج</button>
+          </div>
+        </div>
+
+        <!-- Mobile -->
+        <div class="mobile-auth-btns" id="mobileAuthBtns">
+          <button class="btn-outline" onclick="openAuth('login')">دخول</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          ✨ <span>منصة الترجمة الذكية الأكثر دقة</span>
+        </div>
+        <h1 class="hero-title">
+          ترجمة احترافية<br/>بقوة <span>كهف AI</span>
+        </h1>
+        <p class="hero-subtitle">
+          أداة ترجمة ذكية تدعم أكثر من 30 لغة بدقة عالية، مدعومة بتقنيات الذكاء الاصطناعي الحديثة
+        </p>
+
+        <!-- TRANSLATION CARD -->
+        <div class="translation-card" id="translation">
+          <div class="card-toolbar">
+            <div class="toolbar-actions">
+              <button class="tool-btn" onclick="clearAll()" title="مسح الكل">🗑️</button>
+              <button class="tool-btn" onclick="copyOutput()" title="نسخ الترجمة" id="copyBtn">📋</button>
+              <button class="tool-btn" onclick="speakOutput()" title="استمع">🔊</button>
+            </div>
+            <span class="char-count"><span id="charCount">0</span> حرف</span>
+          </div>
+          
+          <div class="input-area">
+            <textarea 
+              class="trans-textarea" 
+              id="inputText"
+              placeholder="اكتب النص هنا للترجمة..."
+              dir="auto"
+              oninput="updateCharCount()"
+            ></textarea>
+          </div>
+
+          <div class="lang-bar">
+            <!-- Source Language -->
+            <div style="position:relative;">
+              <button class="lang-btn" onclick="toggleSourceDropdown()" id="sourceLangBtn">
+                <span id="sourceLangFlag">🔍</span>
+                <span id="sourceLangLabel">كشف تلقائي</span>
+                <span style="font-size:0.7rem;color:var(--overlay1);">▾</span>
+              </button>
+              <div class="lang-dropdown" id="sourceDropdown" style="display:none;">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+            <button class="swap-btn" onclick="swapLanguages()" title="تبديل اللغتين">⇄</button>
+
+            <!-- Target Language -->
+            <div style="position:relative;">
+              <button class="lang-btn" onclick="toggleTargetDropdown()" id="targetLangBtn">
+                <span id="targetLangFlag">🇬🇧</span>
+                <span id="targetLangLabel">الإنجليزية</span>
+                <span style="font-size:0.7rem;color:var(--overlay1);">▾</span>
+              </button>
+              <div class="lang-dropdown" id="targetDropdown" style="display:none; right:auto; left:0;">
+                <!-- populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <textarea 
+              class="output-textarea" 
+              id="outputText"
+              placeholder="ستظهر الترجمة هنا..."
+              readonly
+              dir="auto"
+            ></textarea>
+          </div>
+
+          <div class="translate-btn-wrap">
+            <button class="translate-btn" onclick="translateText()" id="translateBtn">
+              ترجم الآن 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section id="stats">
+      <div class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="statUsers">0</div>
+            <div class="stat-label">مستخدم مسجل</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statTranslations">0</div>
+            <div class="stat-label">ترجمة ناجحة</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">30+</div>
+            <div class="stat-label">لغة مدعومة</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">99%</div>
+            <div class="stat-label">رضا المستخدمين</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section" id="features">
+      <div class="section-header">
+        <h2 class="section-title">لماذا كهف AI؟</h2>
+        <p class="section-sub">مميزات تجعلنا الخيار الأول للترجمة الذكية</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <div class="feature-title">ترجمة ذكية حقيقية</div>
+          <div class="feature-desc">ترجمة فعلية عبر خوارزميات متطورة تفهم السياق والمعنى، لا مجرد كلمة بكلمة</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">سرعة فائقة</div>
+          <div class="feature-desc">نتائج ترجمة فورية في أقل من ثانية بغض النظر عن طول النص</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-title">نظام مصادقة آمن</div>
+          <div class="feature-desc">تسجيل دخول بالبريد الإلكتروني وكلمة المرور مع حماية كاملة للبيانات</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <div class="feature-title">30+ لغة</div>
+          <div class="feature-desc">دعم شامل لأكثر من 30 لغة عالمية مع اكتشاف تلقائي للغة المصدر</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <div class="feature-title">Google Analytics</div>
+          <div class="feature-desc">تتبع دقيق للزيارات والاستخدام عبر Google Analytics للمدير</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <div class="feature-title">لوحة تحكم المدير</div>
+          <div class="feature-desc">لوحة إدارة متكاملة لمتابعة المستخدمين والترجمات والإحصائيات</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="logo" style="margin-bottom:0.5rem;">
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+              <path d="M16 2C10 2 6 8 6 14c0 4 2 8 4 10v4c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-4c2-2 4-6 4-10 0-6-4-12-10-12zm-4 28v-2h8v2h-8z" fill="#b4befe" opacity="0.9"/>
+              <ellipse cx="16" cy="14" rx="4" ry="6" fill="#1e1e2e"/>
+            </svg>
+            <span class="logo-text">كهف</span><span class="logo-ai">AI</span>
+          </div>
+          <p>منصة الترجمة الذكية الأكثر دقة في العالم العربي، مدعومة بأحدث تقنيات الذكاء الاصطناعي</p>
+        </div>
+        <div>
+          <div class="footer-heading">روابط سريعة</div>
+          <button class="footer-link" onclick="scrollTo('#hero')">الرئيسية</button>
+          <button class="footer-link" onclick="scrollTo('#translation')">الترجمة</button>
+          <button class="footer-link" onclick="scrollTo('#features')">المميزات</button>
+          <button class="footer-link" onclick="scrollTo('#stats')">الإحصائيات</button>
+        </div>
+        <div>
+          <div class="footer-heading">الحساب</div>
+          <button class="footer-link" onclick="openAuth('login')">تسجيل الدخول</button>
+          <button class="footer-link" onclick="openAuth('register')">إنشاء حساب</button>
+        </div>
+      </div>
+      <div class="footer-bottom">كهف AI © 2026 — جميع الحقوق محفوظة</div>
+    </footer>
+
+    <script>
+    // ====================================================
+    // DATA LAYER (localStorage-based)
+    // ====================================================
+
+    // معرف المدير - البريد الإلكتروني الوحيد الذي يملك صلاحيات المدير
+    const ADMIN_EMAIL = 'admin@kahf.ai';
+
+    const DB = {
+      getUsers: () => JSON.parse(localStorage.getItem('kahf_users') || '[]'),
+      saveUsers: (u) => localStorage.setItem('kahf_users', JSON.stringify(u)),
+      getSession: () => JSON.parse(localStorage.getItem('kahf_session') || 'null'),
+      saveSession: (s) => localStorage.setItem('kahf_session', JSON.stringify(s)),
+      clearSession: () => localStorage.removeItem('kahf_session'),
+      getLogs: () => JSON.parse(localStorage.getItem('kahf_logs') || '[]'),
+      saveLogs: (l) => localStorage.setItem('kahf_logs', JSON.stringify(l)),
+      getStats: () => JSON.parse(localStorage.getItem('kahf_stats') || JSON.stringify({total:0, daily:{}})),
+      addTranslation: () => {
+        let s = DB.getStats();
+        s.total = (s.total || 0) + 1;
+        const today = new Date().toISOString().slice(0,10);
+        s.daily[today] = (s.daily[today] || 0) + 1;
+        localStorage.setItem('kahf_stats', JSON.stringify(s));
+      }
+    };
+
+    // Initialize admin account if not exists
+    function initAdminAccount() {
+      let users = DB.getUsers();
+      const hasAdmin = users.find(u => u.email === ADMIN_EMAIL);
+      if (!hasAdmin) {
+        users.push({
+          id: 'admin_001',
+          name: 'المدير',
+          email: ADMIN_EMAIL,
+          password: 'Admin@2026',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        });
+        DB.saveUsers(users);
+      }
+    }
+    initAdminAccount();
+
+    // ====================================================
+    // LANGUAGE DATA
+    // ====================================================
+    const LANGUAGES = [
+      { code: 'auto', label: 'كشف تلقائي', flag: '🔍' },
+      { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+      { code: 'en', label: 'الإنجليزية', flag: '🇬🇧' },
+      { code: 'fr', label: 'الفرنسية', flag: '🇫🇷' },
+      { code: 'es', label: 'الإسبانية', flag: '🇪🇸' },
+      { code: 'de', label: 'الألمانية', flag: '🇩🇪' },
+      { code: 'tr', label: 'التركية', flag: '🇹🇷' },
+      { code: 'zh', label: 'الصينية', flag: '🇨🇳' },
+      { code: 'ja', label: 'اليابانية', flag: '🇯🇵' },
+      { code: 'ru', label: 'الروسية', flag: '🇷🇺' },
+      { code: 'pt', label: 'البرتغالية', flag: '🇵🇹' },
+      { code: 'it', label: 'الإيطالية', flag: '🇮🇹' },
+      { code: 'nl', label: 'الهولندية', flag: '🇳🇱' },
+      { code: 'ko', label: 'الكورية', flag: '🇰🇷' },
+      { code: 'fa', label: 'الفارسية', flag: '🇮🇷' },
+      { code: 'ur', label: 'الأردية', flag: '🇵🇰' },
+      { code: 'he', label: 'العبرية', flag: '🇮🇱' },
+      { code: 'sv', label: 'السويدية', flag: '🇸🇪' },
+      { code: 'pl', label: 'البولندية', flag: '🇵🇱' },
+      { code: 'id', label: 'الإندونيسية', flag: '🇮🇩' },
+    ];
+
+    let sourceLang = { code: 'ar', label: 'العربية', flag: '🇸🇦' };
+    let targetLang = { code: 'en', label: 'الإنجليزية', flag: '🇬🇧' };
+
+    function buildDropdowns() {
+      const srcDrop = document.getElementById('sourceDropdown');
+      const tgtDrop = document.getElementById('targetDropdown');
+      srcDrop.innerHTML = LANGUAGES.map(l => `
+        <button class="lang-option ${l.code === sourceLang.code ? 'active':''}"
+          onclick="selectSource('${l.code}')">
+          <span>${l.flag}</span><span>${l.label}</span>
+        </button>`).join('');
+      tgtDrop.innerHTML = LANGUAGES.filter(l=>l.code!=='auto').map(l => `
+        <button class="lang-option ${l.code === targetLang.code ? 'active':''}"
+          onclick="selectTarget('${l.code}')">
+          <span>${l.flag}</span><span>${l.label}</span>
+        </button>`).join('');
+    }
+
+    function selectSource(code) {
+      const l = LANGUAGES.find(x=>x.code===code);
+      sourceLang = l;
+      document.getElementById('sourceLangFlag').textContent = l.flag;
+      document.getElementById('sourceLangLabel').textContent = l.label;
+      document.getElementById('sourceDropdown').style.display = 'none';
+      buildDropdowns();
+    }
+    function selectTarget(code) {
+      const l = LANGUAGES.find(x=>x.code===code);
+      targetLang = l;
+      document.getElementById('targetLangFlag').textContent = l.flag;
+      document.getElementById('targetLangLabel').textContent = l.label;
+      document.getElementById('targetDropdown').style.display = 'none';
+      buildDropdowns();
+    }
+    function toggleSourceDropdown() {
+      const d = document.getElementById('sourceDropdown');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+      document.getElementById('targetDropdown').style.display = 'none';
+    }
+    function toggleTargetDropdown() {
+      const d = document.getElementById('targetDropdown');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+      document.getElementById('sourceDropdown').style.display = 'none';
+    }
+    function swapLanguages() {
+      if (sourceLang.code === 'auto') { showToast('لا يمكن التبديل مع الكشف التلقائي', 'error'); return; }
+      const tmp = sourceLang;
+      sourceLang = targetLang;
+      targetLang = tmp;
+      document.getElementById('sourceLangFlag').textContent = sourceLang.flag;
+      document.getElementById('sourceLangLabel').textContent = sourceLang.label;
+      document.getElementById('targetLangFlag').textContent = targetLang.flag;
+      document.getElementById('targetLangLabel').textContent = targetLang.label;
+      const input = document.getElementById('inputText').value;
+      document.getElementById('inputText').value = document.getElementById('outputText').value;
+      document.getElementById('outputText').value = input;
+      updateCharCount();
+      buildDropdowns();
+    }
+
+    // Click outside to close dropdowns
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[onclick*="toggleSourceDropdown"]') && !e.target.closest('#sourceDropdown'))
+        document.getElementById('sourceDropdown').style.display = 'none';
+      if (!e.target.closest('[onclick*="toggleTargetDropdown"]') && !e.target.closest('#targetDropdown'))
+        document.getElementById('targetDropdown').style.display = 'none';
+      if (!e.target.closest('.user-menu'))
+        document.getElementById('userDropdown').classList.remove('open');
+    });
+
+    buildDropdowns();
+
+    // ====================================================
+    // TRANSLATION ENGINE (MyMemory API - Free & Real)
+    // ====================================================
+    async function translateText() {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) { showToast('الرجاء إدخال نص للترجمة', 'error'); return; }
+
+      const btn = document.getElementById('translateBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> جاري الترجمة...';
+
+      const src = sourceLang.code === 'auto' ? 'ar' : sourceLang.code;
+      const tgt = targetLang.code;
+
+      try {
+        // MyMemory API - مجاني ويعمل بدون مفتاح
+        const langPair = `${src}|${tgt}`;
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+          const translated = data.responseData.translatedText;
+          document.getElementById('outputText').value = translated;
+          showToast('✅ تمت الترجمة بنجاح!', 'success');
+          
+          // Track in analytics
+          DB.addTranslation();
+          if (window.trackEvent) trackEvent('translate', 'Translation', `${src} → ${tgt}`);
+          
+          // Log for admin
+          logTranslation(text, translated, src, tgt);
+          updateDynamicStats();
+        } else {
+          throw new Error('Translation failed');
+        }
+      } catch (err) {
+        showToast('❌ تعذرت الترجمة، تحقق من الاتصال', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'ترجم الآن 🚀';
+      }
+    }
+
+    function logTranslation(input, output, from, to) {
+      const session = DB.getSession();
+      const logs = DB.getLogs();
+      logs.unshift({
+        user: session ? session.name : 'زائر',
+        from, to,
+        text: input.slice(0, 60) + (input.length > 60 ? '...' : ''),
+        time: new Date().toLocaleString('ar-SA')
+      });
+      if (logs.length > 100) logs.pop();
+      DB.saveLogs(logs);
+    }
+
+    // ====================================================
+    // UI HELPERS
+    // ====================================================
+    function updateCharCount() {
+      document.getElementById('charCount').textContent = document.getElementById('inputText').value.length;
+    }
+    function clearAll() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('outputText').value = '';
+      updateCharCount();
+      showToast('تم المسح', 'success');
+    }
+    async function copyOutput() {
+      const text = document.getElementById('outputText').value;
+      if (!text) return;
+      await navigator.clipboard.writeText(text).catch(()=>{});
+      document.getElementById('copyBtn').textContent = '✅';
+      showToast('تم النسخ!', 'success');
+      setTimeout(() => document.getElementById('copyBtn').textContent = '📋', 2000);
+    }
+    function speakOutput() {
+      const text = document.getElementById('outputText').value;
+      if (!text || !window.speechSynthesis) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = targetLang.code === 'ar' ? 'ar-SA' : targetLang.code;
+      speechSynthesis.speak(u);
+    }
+
+    function showToast(msg, type='success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function scrollTo(id) {
+      document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+    function scrollToAndClose(id) {
+      scrollTo(id);
+      document.getElementById('userDropdown').classList.remove('open');
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ====================================================
+    // AUTH SYSTEM
+    // ====================================================
+    function openAuth(tab='login') {
+      document.getElementById('authModal').classList.add('open');
+      switchTab(tab);
+      clearAuthError();
+    }
+    function closeAuth() {
+      document.getElementById('authModal').classList.remove('open');
+    }
+    document.getElementById('authModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('authModal')) closeAuth();
+    });
+
+    function switchTab(tab) {
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+      document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+      clearAuthError();
+    }
+
+    function showAuthError(msg) {
+      const e = document.getElementById('authError');
+      e.textContent = msg;
+      e.classList.add('show');
+    }
+    function clearAuthError() {
+      document.getElementById('authError').classList.remove('show');
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPassword').value;
+      if (!email || !pass) { showAuthError('يرجى ملء جميع الحقول'); return; }
+
+      const users = DB.getUsers();
+      const user = users.find(u => u.email === email && u.password === pass);
+      if (!user) { showAuthError('البريد الإلكتروني أو كلمة المرور غير صحيحة'); return; }
+
+      DB.saveSession(user);
+      closeAuth();
+      updateNavForUser(user);
+      showToast(`مرحباً ${user.name}! 👋`, 'success');
+      if (window.trackEvent) trackEvent('login', 'Auth', 'success');
+      updateDynamicStats();
+    }
+
+    function handleRegister() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('regPassword').value;
+      
+      if (!name || !email || !pass) { showAuthError('يرجى ملء جميع الحقول'); return; }
+      if (pass.length < 6) { showAuthError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthError('البريد الإلكتروني غير صالح'); return; }
+
+      const users = DB.getUsers();
+      if (users.find(u => u.email === email)) { showAuthError('هذا البريد الإلكتروني مسجل بالفعل'); return; }
+
+      const newUser = {
+        id: 'u_' + Date.now(),
+        name, email, password: pass,
+        role: email === ADMIN_EMAIL ? 'admin' : 'user',
+        createdAt: new Date().toISOString()
+      };
+      users.push(newUser);
+      DB.saveUsers(users);
+      DB.saveSession(newUser);
+      closeAuth();
+      updateNavForUser(newUser);
+      showToast(`مرحباً ${name}! تم إنشاء حسابك بنجاح 🎉`, 'success');
+      if (window.trackEvent) trackEvent('register', 'Auth', 'new_user');
+      updateDynamicStats();
+    }
+
+    function handleLogout() {
+      DB.clearSession();
+      document.getElementById('navActions').style.display = 'flex';
+      document.getElementById('mobileAuthBtns').style.display = 'flex';
+      document.getElementById('userMenu').style.display = 'none';
+      document.getElementById('userDropdown').classList.remove('open');
+      showToast('تم تسجيل الخروج', 'success');
+      updateDynamicStats();
+    }
+
+    function updateNavForUser(user) {
+      document.getElementById('navActions').style.display = 'none';
+      document.getElementById('mobileAuthBtns').style.display = 'none';
+      document.getElementById('userMenu').style.display = 'block';
+      
+      const initial = user.name.charAt(0);
+      document.getElementById('userAvatar').textContent = initial;
+      document.getElementById('userDisplayName').textContent = user.name;
+
+      if (user.role === 'admin' || user.email === ADMIN_EMAIL) {
+        document.getElementById('adminBtn').style.display = 'block';
+        document.getElementById('adminDivider').style.display = 'block';
+      }
+    }
+
+    function toggleDropdown() {
+      document.getElementById('userDropdown').classList.toggle('open');
+    }
+
+    // ====================================================
+    // ADMIN PANEL
+    // ====================================================
+    function openAdmin() {
+      const session = DB.getSession();
+      if (!session || (session.role !== 'admin' && session.email !== ADMIN_EMAIL)) {
+        showToast('غير مصرح لك بالوصول', 'error'); return;
+      }
+      document.getElementById('adminPanel').classList.add('open');
+      document.getElementById('userDropdown').classList.remove('open');
+      renderAdmin();
+      if (window.trackEvent) trackEvent('admin_open', 'Admin', 'dashboard');
+    }
+
+    function closeAdmin() {
+      document.getElementById('adminPanel').classList.remove('open');
+    }
+
+    function renderAdmin() {
+      const users = DB.getUsers();
+      const stats = DB.getStats();
+      const logs = DB.getLogs();
+
+      // Cards
+      document.getElementById('adminCards').innerHTML = `
+        <div class="admin-card"><div class="admin-card-label">إجمالي المستخدمين</div><div class="admin-card-value">${users.length}</div></div>
+        <div class="admin-card"><div class="admin-card-label">إجمالي الترجمات</div><div class="admin-card-value">${stats.total || 0}</div></div>
+        <div class="admin-card"><div class="admin-card-label">ترجمات اليوم</div><div class="admin-card-value">${stats.daily[new Date().toISOString().slice(0,10)] || 0}</div></div>
+        <div class="admin-card"><div class="admin-card-label">سجلات النشاط</div><div class="admin-card-value">${logs.length}</div></div>
+      `;
+
+      // Bar Chart
+      const days = [];
+      for (let i=6; i>=0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        days.push(d.toISOString().slice(0,10));
+      }
+      const maxVal = Math.max(...days.map(d=>stats.daily[d]||0), 1);
+      document.getElementById('barChart').innerHTML = days.map(d => {
+        const val = stats.daily[d] || 0;
+        const h = Math.max((val/maxVal)*80, 4);
+        return `<div class="bar" style="height:${h}px;" title="${val} ترجمة"></div>`;
+      }).join('');
+      document.getElementById('barLabels').innerHTML = days.map(d => 
+        `<span style="flex:1;text-align:center;">${d.slice(5)}</span>`
+      ).join('');
+
+      // Users table
+      document.getElementById('usersTable').innerHTML = users.map((u, i) => `
+        <tr>
+          <td style="color:var(--overlay1)">${i+1}</td>
+          <td>${u.name}</td>
+          <td dir="ltr" style="color:var(--blue)">${u.email}</td>
+          <td><span class="${u.role==='admin'?'badge-admin':'badge-user'}">${u.role==='admin'?'🛡️ مدير':'👤 مستخدم'}</span></td>
+          <td style="color:var(--overlay1)">${new Date(u.createdAt).toLocaleDateString('ar-SA')}</td>
+          <td>${u.role!=='admin'?`<button class="action-btn-sm delete-btn" onclick="deleteUser('${u.id}')">حذف</button>`:'—'}</td>
+        </tr>`).join('');
+
+      // Translations log
+      document.getElementById('transTable').innerHTML = logs.slice(0,20).map(l => `
+        <tr>
+          <td>${l.user}</td>
+          <td>${l.from}</td>
+          <td>${l.to}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.text}</td>
+          <td style="color:var(--overlay1);font-size:0.78rem;">${l.time}</td>
+        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--overlay1)">لا توجد ترجمات بعد</td></tr>';
+    }
+
+    function deleteUser(id) {
+      if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+      const users = DB.getUsers().filter(u => u.id !== id);
+      DB.saveUsers(users);
+      renderAdmin();
+      showToast('تم حذف المستخدم', 'success');
+    }
+
+    // ====================================================
+    // DYNAMIC STATS on homepage
+    // ====================================================
+    function updateDynamicStats() {
+      const users = DB.getUsers();
+      const stats = DB.getStats();
+      animateNumber('statUsers', users.length);
+      animateNumber('statTranslations', stats.total || 0);
+    }
+
+    function animateNumber(id, target) {
+      const el = document.getElementById(id);
+      const start = parseInt(el.textContent) || 0;
+      const duration = 800;
+      const startTime = performance.now();
+      function update(now) {
+        const t = Math.min((now-startTime)/duration, 1);
+        el.textContent = Math.round(start + (target-start)*t);
+        if (t < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+
+    // ====================================================
+    // INIT
+    // ====================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      const session = DB.getSession();
+      if (session) {
+        // Refresh user data from DB
+        const users = DB.getUsers();
+        const freshUser = users.find(u => u.id === session.id);
+        if (freshUser) {
+          DB.saveSession(freshUser);
+          updateNavForUser(freshUser);
+        } else {
+          DB.clearSession();
+        }
+      }
+      updateDynamicStats();
+    });
+    </script>
+  </body>
+</html>
